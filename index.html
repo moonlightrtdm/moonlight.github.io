@@ -314,6 +314,15 @@ h2.glitch::after{opacity:.85;color:#3ad7ff;transform:translate(3px,2px);clip-pat
 .spec div{background:var(--ink);padding:20px 18px}
 .spec b{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.26em;color:var(--chrome-lo);text-transform:uppercase;display:block;margin-bottom:8px}
 .spec span{font-family:var(--font-display);font-size:1.15rem;text-transform:uppercase;letter-spacing:.04em}
+.crew{margin-top:46px}
+.crew-list{display:flex;flex-wrap:wrap;gap:10px}
+.crew-list a,.crew-list span{
+  font-family:var(--font-mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;
+  border:1px solid var(--steel);padding:8px 13px;color:var(--chrome-hi);text-decoration:none;
+  transition:border-color .2s,color .2s,box-shadow .2s;
+}
+.crew-list span{color:var(--chrome-lo)}
+.crew-list a:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 12px rgba(196,39,26,.35)}
 
 /* ---- events ---- */
 .event-list{border-top:1px solid var(--steel)}
@@ -430,6 +439,10 @@ body.lb-open{overflow:hidden}
   max-width:100%;max-height:calc(100vh - 230px);border:1px solid var(--steel);display:block;
   box-shadow:0 20px 60px rgba(0,0,0,.6);transition:opacity .2s;
 }
+#lbVid{
+  max-width:100%;max-height:calc(100vh - 230px);border:1px solid var(--steel);display:block;
+  background:#000;box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
 #lightbox.loading #lbImg{opacity:.3}
 #lbPh{
   width:min(620px,80vw);aspect-ratio:4/3;display:none;align-items:center;justify-content:center;
@@ -460,9 +473,14 @@ body.lb-open{overflow:hidden}
 .lb-strip button:hover{opacity:.85}
 .lb-strip button.on{opacity:1;border-color:var(--accent);box-shadow:0 0 10px var(--accent)}
 .lb-strip img{width:100%;height:100%;object-fit:cover;display:block}
+.lb-strip button{position:relative}
+.lb-strip button.clip::after{
+  content:"▶";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:.8rem;text-shadow:0 0 6px #000;
+}
 @media(max-width:640px){
   #lightbox{padding:64px 10px 100px}
-  #lbImg{max-height:calc(100svh - 210px)}
+  #lbImg,#lbVid{max-height:calc(100svh - 210px)}
   #lbPrev{left:6px}#lbNext{right:6px}
   #lightbox > button{width:40px;height:40px;background:rgba(6,6,7,.75)}
   .lb-strip button{width:60px;height:45px}
@@ -556,6 +574,10 @@ footer .coords{color:var(--chrome-lo)}
       <p id="aboutP2"></p>
       <div class="stamp" id="aboutStamp"></div>
       <div class="spec" id="specGrid"></div>
+      <div class="crew">
+        <div class="kicker">The crew — everyone who's played Moonlight</div>
+        <div class="crew-list" id="crewList"></div>
+      </div>
     </div>
   </section>
 </div>
@@ -596,6 +618,7 @@ footer .coords{color:var(--chrome-lo)}
   <button id="lbPrev" aria-label="Previous photo">‹</button>
   <div class="lb-stage">
     <img id="lbImg" alt="">
+    <video id="lbVid" playsinline controls loop preload="metadata" style="display:none"></video>
     <div id="lbPh"><span>drop photo</span></div>
     <div id="lbCap"></div>
   </div>
@@ -656,26 +679,55 @@ const CONFIG = {
 
   /* type:"next" = pulsing tag.  secret:true = redacted location bar
      album:N = adds a "see photos" link that opens gallery entry N (0 = first)
-     lineup:"…" = optional extra line with the DJs */
+     lineup:"…" = optional extra line with the DJs, in timetable order */
   events: [
     { date: "SOON",     name: "Next Moonlight",      meta: "location", tag: "Announced soon", type: "next", secret: true },
-    { date: "26.09.26", name: "Moonlight Vol.5 — Duke of Tokyo", meta: "10PM–3AM · €5 ticket · house / tech house / techno", tag: "Club night",
-      lineup: "Drei · Quintexx · Emilio · Yusa · Velázquez · Artur · Lolli" },
+    { date: "26.09.26", name: "Moonlight Vol.5 — Duke of Tokyo", meta: "10PM–3AM · €5 ticket · house / tech house / techno", tag: "Club night", album: 0,
+      lineup: "Drei · Quintexx · Emilio · Yusa & Drei · Kike · Lolli & Artur" },
     { date: "12.09.26", name: "New Semester — Duke of Tokyo",    meta: "10PM–3AM · €5 ticket · open deck for new DJs",        tag: "Open deck",
       lineup: "Yusa · Lolli · Artur · Cagan · Velázquez" },
-    { date: "23.05.26", name: "Lake Party",           meta: "DJ set · free beer · 6PM–10PM",  tag: "Free event", album: 0 },
-    { date: "14.05.26", name: "Duke of Tokyo",        meta: "10PM–2AM · €5 ticket",           tag: "Club night", album: 1 },
-    { date: "19.03.26", name: "Duke of Tokyo",        meta: "10PM–2AM · €3 ticket",           tag: "Club night" },
+    { date: "23.05.26", name: "Lake Party",           meta: "6PM–10PM · free beer · house / hip-hop", tag: "Free event", album: 1,
+      lineup: "The Moonlight crew" },
+    { date: "14.05.26", name: "Duke of Tokyo",        meta: "10PM–2AM · €5 ticket · tech house / techno / hip-hop", tag: "Club night", album: 2,
+      lineup: "Cagan · Skybrothers · Quintexx · Drei · Yusa & Amber Boo · Lolli & Artur · Adam Papanek" },
+    { date: "19.03.26", name: "Duke of Tokyo",        meta: "10PM–2AM · €3 ticket · tech house / techno", tag: "Club night", album: 3,
+      lineup: "Amber Boo · Skybrothers · Drei · Yusa · Dr. Hide · Lolli & Artur · Adam Papanek" },
+    { date: "17.01.26", name: "Super Disco Rotterdam", meta: "Moonlight night at Super Disco", tag: "Club night", album: 4 },
     { date: "08.11.25", name: "Secret Location",      meta: "tech house, UKG, techno · 10PM–3AM", tag: "Secret", secret: true },
-    { date: "06.11.25", name: "OoO × The Social Hub", meta: "Out Of Office Drinks · 19:00–22:00", tag: "Collab" },
+    { date: "06.11.25", name: "OoO × The Social Hub", meta: "Out Of Office Drinks · The Social Hub Eindhoven · 19:00–22:00", tag: "Collab",
+      lineup: "Yusa · Taki · Lolli · Amber Boo" },
   ],
 
-  /* previous parties. photos:N shows folder/<prefix>001.jpg … up to N
-     (small versions come from folder/thumbs/). cover = photo number on the card.
-     credit = optional "photos by" line shown in the viewer. */
+  /* previous parties, newest first.
+     photos:N → folder/<prefix>001.jpg … (pad = how many digits)
+     clips:N  → folder/clips/<prefix>c01.mp4 …  (short videos)
+     small versions of both live in folder/thumbs/ with the same names.
+     cover = which item (1 = first) is on the card. credit = optional "photos by". */
   gallery: [
-    { caption: "Lake Party — sundown set", cover: 1, folder: "lake", prefix: "l", pad: 3, photos: 62, credit: "Photos by @sofia_bocchio" },
-    { caption: "Duke of Tokyo — €5 night", cover: 3, folder: "duke", prefix: "d", pad: 2, photos: 32 },
+    { date: "26.09.26", caption: "Moonlight Vol.5",          folder: "sep26", prefix: "s", pad: 2, clips: 4,   cover: 1 },
+    { date: "23.05.26", caption: "Lake Party — sundown set", folder: "lake",  prefix: "l", pad: 3, photos: 62, cover: 1, credit: "Photos by @sofia_bocchio" },
+    { date: "14.05.26", caption: "Duke of Tokyo — €5 night", folder: "duke",  prefix: "d", pad: 2, photos: 32, cover: 3 },
+    { date: "19.03.26", caption: "Duke of Tokyo — €3 night", folder: "mar19", prefix: "m", pad: 2, clips: 10,  cover: 2 },
+    { date: "17.01.26", caption: "Super Disco Rotterdam",    folder: "jan17", prefix: "j", pad: 2, photos: 25, cover: 1 },
+  ],
+
+  /* everyone who has played Moonlight — shown as "The crew" in About.
+     ig = Instagram username without the @ ("" = no link) */
+  crew: [
+    { name: "Yusa",         ig: "yusa.san" },
+    { name: "Lolli",        ig: "denicola.lolli" },
+    { name: "Artur",        ig: "_arturfulop_" },
+    { name: "Drei",         ig: "its._.drei" },
+    { name: "Quintexx",     ig: "djquintexx" },
+    { name: "Amber Boo",    ig: "amberboodj" },
+    { name: "Skybrothers",  ig: "theskybrothers_" },
+    { name: "Adam Papanek", ig: "adam.papanek" },
+    { name: "Dr. Hide",     ig: "dr.hide_" },
+    { name: "Cagan",        ig: "caganpoyraz_" },
+    { name: "Emilio",       ig: "emilio.glr" },
+    { name: "Velázquez",    ig: "velazquez.wav" },
+    { name: "Kike",         ig: "" },
+    { name: "Taki",         ig: "" },
   ],
 
   instagram: {
@@ -715,6 +767,18 @@ $('aboutP1').textContent     = CONFIG.about.p1;
 $('aboutP2').textContent     = CONFIG.about.p2;
 $('aboutStamp').textContent  = CONFIG.about.stamp;
 $('specGrid').innerHTML = CONFIG.about.specs.map(s=>`<div><b>${s.k}</b><span>${s.v}</span></div>`).join('');
+$('crewList').innerHTML = (CONFIG.crew||[]).map(c=> c.ig
+  ? `<a href="https://www.instagram.com/${c.ig}/" target="_blank" rel="noopener" title="@${c.ig}">${c.name}</a>`
+  : `<span>${c.name}</span>`).join('');
+
+/* ---- archive: each album is a list of photos then clips ---- */
+const itemsOf = g => [
+  ...Array.from({length:g.photos||0},(_,i)=>{ const n=g.prefix+String(i+1).padStart(g.pad,'0');
+    return {clip:false, full:`${g.folder}/${n}.jpg`, thumb:`${g.folder}/thumbs/${n}.jpg`}; }),
+  ...Array.from({length:g.clips||0},(_,i)=>{ const n=g.prefix+'c'+String(i+1).padStart(2,'0');
+    return {clip:true, full:`${g.folder}/clips/${n}.mp4`, thumb:`${g.folder}/thumbs/${n}.jpg`}; }),
+];
+const countOf = g => [g.photos ? `${g.photos} photos` : '', g.clips ? `${g.clips} clips` : ''].filter(Boolean).join(' · ');
 
 $('eventList').innerHTML = CONFIG.events.map(e=>{
   const g = e.album!=null ? CONFIG.gallery[e.album] : null;
@@ -725,58 +789,66 @@ $('eventList').innerHTML = CONFIG.events.map(e=>{
       <div class="name">${e.name}</div>
       <div class="meta">${e.secret ? e.meta.replace(/location/i,'<span class="redact">location</span>') : e.meta}</div>
       ${e.lineup ? `<div class="meta lineup">Lineup — ${e.lineup}</div>` : ``}
-      ${g && g.photos ? `<button class="ev-photos" data-i="${e.album}">See ${g.photos} photos →</button>` : ``}
+      ${g && itemsOf(g).length ? `<button class="ev-photos" data-i="${e.album}">${g.photos ? 'See' : 'Watch'} ${countOf(g)} →</button>` : ``}
     </div>
     <div class="tag">${e.tag}</div>
   </div>`;}).join('');
 
-/* ---- archive gallery + lightbox ---- */
-const photoName = (g,k) => g.prefix + String(k).padStart(g.pad,'0') + '.jpg';
-const fullOf  = (g,k) => `${g.folder}/${photoName(g,k)}`;
-const thumbOf = (g,k) => `${g.folder}/thumbs/${photoName(g,k)}`;
-
-$('gallery').innerHTML = CONFIG.gallery.map((g,i)=>`
-  <button class="shot" data-i="${i}" aria-label="Open photos: ${g.caption}">
+$('gallery').innerHTML = CONFIG.gallery.map((g,i)=>{
+  const items=itemsOf(g), cov=items[(g.cover||1)-1]||items[0];
+  return `
+  <button class="shot" data-i="${i}" aria-label="Open: ${g.caption}, ${g.date||''}">
     <span class="tape"></span>
-    ${g.photos ? `<img src="${thumbOf(g,g.cover||1)}" alt="" loading="lazy" decoding="async">` : `<span class="ph"><span class="ph-label">drop photo</span></span>`}
-    ${g.photos ? `<span class="count">${g.photos} photos</span>` : ``}
-    <span class="cap">${g.caption}</span>
-  </button>`).join('');
+    ${cov ? `<img src="${cov.thumb}" alt="" loading="lazy" decoding="async">` : `<span class="ph"><span class="ph-label">drop photo</span></span>`}
+    ${items.length ? `<span class="count">${countOf(g)}</span>` : ``}
+    <span class="cap">${g.date ? g.date+'  ·  ' : ''}${g.caption}</span>
+  </button>`;}).join('');
 
-const lb=$('lightbox'), lbImg=$('lbImg'), lbPh=$('lbPh'), lbCap=$('lbCap'), lbStrip=$('lbStrip');
-let lbG=null, lbIndex=0, lbReturn=null;
+const lb=$('lightbox'), lbImg=$('lbImg'), lbVid=$('lbVid'), lbPh=$('lbPh'), lbCap=$('lbCap'), lbStrip=$('lbStrip');
+let lbG=null, lbItems=[], lbIndex=0, lbReturn=null;
 lbImg.addEventListener('load', ()=>lb.classList.remove('loading'));
 lbImg.addEventListener('error',()=>lb.classList.remove('loading'));
+let wantPlay=false;
+lbVid.addEventListener('loadeddata',()=>{ lb.classList.remove('loading'); if(wantPlay){ wantPlay=false; lbVid.play().catch(()=>{}); } });
+lbVid.addEventListener('error',()=>lb.classList.remove('loading'));
+/* when a clip plays with its sound on, the background sound steps aside */
+const duck = ()=> dispatchEvent(new CustomEvent('moonlight-duck',{detail: lb.classList.contains('open') && !lbVid.paused && !lbVid.muted}));
+['play','pause','volumechange'].forEach(ev=>lbVid.addEventListener(ev,duck));
+function stopClip(){ wantPlay=false; lbVid.pause(); lbVid.removeAttribute('src'); lbVid.load(); lbVid.style.display='none'; }
 function renderLb(){
-  const g=lbG;
-  if(g.photos){
-    const k=lbIndex+1;
-    lb.classList.add('loading');
-    lbImg.src=fullOf(g,k); lbImg.alt=`${g.caption} — photo ${k} of ${g.photos}`;
-    lbImg.style.display='block'; lbPh.style.display='none';
-    lbCap.textContent=`${g.caption}  ·  ${k} / ${g.photos}${g.credit ? '  ·  '+g.credit : ''}`;
-    /* load the neighbours in the background so next/prev feel instant */
-    [k+1,k-1].forEach(j=>{ if(j>=1 && j<=g.photos) new Image().src=fullOf(g,j); });
-    [...lbStrip.children].forEach((t,j)=>t.classList.toggle('on',j===lbIndex));
-    const on=lbStrip.children[lbIndex];
-    if(on) lbStrip.scrollTo({left:on.offsetLeft-lbStrip.clientWidth/2+on.offsetWidth/2, behavior:reduced?'auto':'smooth'});
+  const g=lbG, it=lbItems[lbIndex], k=lbIndex+1, n=lbItems.length;
+  if(!it){ stopClip(); lbImg.removeAttribute('src'); lbImg.style.display='none'; lbPh.style.display='flex'; lbCap.textContent=g.caption; return; }
+  lb.classList.add('loading'); lbPh.style.display='none';
+  if(it.clip){
+    lbImg.removeAttribute('src'); lbImg.style.display='none';
+    lbVid.muted=true; lbVid.poster=it.thumb; lbVid.src=it.full; lbVid.style.display='block';
+    wantPlay=true; lbVid.play().then(()=>{ wantPlay=false; }).catch(()=>{});
   } else {
-    lbImg.removeAttribute('src'); lbImg.style.display='none'; lbPh.style.display='flex';
-    lbCap.textContent=g.caption;
+    stopClip();
+    lbImg.src=it.full; lbImg.alt=`${g.caption} — photo ${k} of ${n}`; lbImg.style.display='block';
+    /* load the neighbouring photos in the background so next/prev feel instant */
+    [lbItems[lbIndex+1],lbItems[lbIndex-1]].forEach(x=>{ if(x && !x.clip) new Image().src=x.full; });
   }
+  lbCap.textContent=`${g.date ? g.date+'  ·  ' : ''}${g.caption}  ·  ${k} / ${n}${it.clip ? '  ·  clip — tap 🔊 for sound' : ''}${g.credit && !it.clip ? '  ·  '+g.credit : ''}`;
+  [...lbStrip.children].forEach((t,j)=>t.classList.toggle('on',j===lbIndex));
+  const on=lbStrip.children[lbIndex];
+  if(on) lbStrip.scrollTo({left:on.offsetLeft-lbStrip.clientWidth/2+on.offsetWidth/2, behavior:reduced?'auto':'smooth'});
+  duck();
 }
 function openEvent(i){
   const g=CONFIG.gallery[i]; if(!g) return;
-  lbG=g; lbIndex=0; lbReturn=document.activeElement;
-  lbStrip.innerHTML = Array.from({length:g.photos||0},(_,j)=>
-    `<button data-k="${j}" aria-label="Photo ${j+1}"><img src="${thumbOf(g,j+1)}" alt="" loading="lazy" decoding="async"></button>`).join('');
+  lbG=g; lbItems=itemsOf(g); lbIndex=0; lbReturn=document.activeElement;
+  lbStrip.innerHTML = lbItems.map((it,j)=>
+    `<button data-k="${j}" class="${it.clip?'clip':''}" aria-label="${it.clip?'Clip':'Photo'} ${j+1}"><img src="${it.thumb}" alt="" loading="lazy" decoding="async"></button>`).join('');
   lb.classList.add('open'); lb.setAttribute('aria-hidden','false'); document.body.classList.add('lb-open');
   renderLb();
   $('lbClose').focus();
 }
-function step(d){ if(!lbG || !lbG.photos) return; const n=lbG.photos; lbIndex=(lbIndex+d%n+n)%n; renderLb(); }
+function step(d){ const n=lbItems.length; if(!n) return; lbIndex=(lbIndex+d%n+n)%n; renderLb(); }
 function closeLb(){
+  stopClip();
   lb.classList.remove('open'); lb.setAttribute('aria-hidden','true'); document.body.classList.remove('lb-open');
+  duck();
   if(lbReturn) lbReturn.focus();
 }
 $('gallery').addEventListener('click',e=>{const b=e.target.closest('.shot'); if(b) openEvent(+b.dataset.i);});
@@ -813,8 +885,7 @@ $('footCoords').textContent= CONFIG.footer.coords;
 function renderCountdown(){
   const el = $('countdown');
   if(!CONFIG.nextEventDate){
-    el.innerHTML = `<div class="cd-cell cd-tba"><b>TBA</b><span>next event</span></div>
-                    <div class="cd-cell"><b>IG</b><span>watch the grid</span></div>`;
+    el.innerHTML = `<div class="cd-cell cd-tba"><b>TBA</b><span>next event</span></div>`;
     return;
   }
   const t = new Date(CONFIG.nextEventDate) - Date.now();
@@ -970,6 +1041,8 @@ function ambientEngine(ctx, pulse){
     if(M.autoplay && pref!=='off') setOn(true);
   }
   addEventListener('click',first,true); addEventListener('keydown',first,true);
+  /* step aside while a party clip plays with its own sound */
+  addEventListener('moonlight-duck',e=>{ if(ctx && on) fade(e.detail ? 0 : LEVEL, e.detail ? .5 : 2.5); });
   /* go quiet while the tab is in the background */
   document.addEventListener('visibilitychange',()=>{
     if(!ctx || !on) return;
