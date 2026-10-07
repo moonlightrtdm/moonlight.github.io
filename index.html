@@ -47,7 +47,7 @@
   --chrome-lo: #82828e;   /* secondary text                   */
   --accent:    #c4271a;   /* ★ accent ★ (try #c8ff1e, #2e7bff)*/
   --line:      #3a3a44;   /* center line base                 */
-  --grain:.12; --scan:.5; --grime:.06;  /* texture intensities (tweakable) */
+  --grain:.12; --scan:.5;  /* film grain + scanline strength */
 
   --font-display:'Anton', sans-serif;
   --font-marker: 'Permanent Marker', cursive;
@@ -95,15 +95,6 @@ body::before{
   0%,100%{transform:translate(0,0)}10%{transform:translate(-5%,-8%)}
   30%{transform:translate(3%,-12%)}50%{transform:translate(8%,4%)}
   70%{transform:translate(-7%,6%)}90%{transform:translate(4%,8%)}
-}
-#flicker{
-  position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:9992;
-}
-/* ---- halftone grime layer ---- */
-#halftone{
-  position:fixed;inset:0;pointer-events:none;z-index:9989;
-  background:url("halftone.png");background-size:300px;
-  opacity:var(--grime);mix-blend-mode:soft-light;
 }
 
 /* ============ CENTER LINE — draws down the middle ============ */
@@ -274,11 +265,7 @@ header{
 }
 .ticker span b{color:var(--accent);font-weight:400}
 
-.ticker.rev{border-top:none}
-.ticker.rev .ticker-track{animation:ticker-rev 60s linear infinite}
-.ticker.rev span{-webkit-text-stroke:1px var(--chrome-lo);color:transparent}
 @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@keyframes ticker-rev{from{transform:translateX(-50%)}to{transform:translateX(0)}}
 
 /* ===================== SECTIONS ===================== */
 section{position:relative;z-index:2;padding:120px 24px;max-width:1060px;margin:0 auto}
@@ -363,38 +350,6 @@ h2.glitch::after{opacity:.85;color:#3ad7ff;transform:translate(3px,2px);clip-pat
   .event .tag{justify-self:start}
 }
 
-/* ---- community / wall ---- */
-.wall-box{
-  border:1px solid var(--steel);padding:40px 30px;background:var(--ink-2);
-  position:relative;overflow:hidden;
-}
-.wall-box::before{
-  content:"COMMUNITY";position:absolute;right:-18px;bottom:-30px;
-  font-family:var(--font-display);font-size:7rem;color:#15151a;
-  letter-spacing:.05em;pointer-events:none;user-select:none;
-}
-.wall-box h3{font-family:var(--font-display);text-transform:uppercase;font-size:1.5rem;margin-bottom:6px}
-.wall-box .hint{color:var(--chrome-lo);font-size:.84rem;margin-bottom:24px;font-family:var(--font-mono)}
-.wall-form{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px;position:relative;z-index:1}
-.wall-form input{
-  flex:1;min-width:200px;background:var(--ink);border:1px solid var(--steel);
-  color:var(--chrome-hi);padding:13px 18px;font-family:var(--font-mono);
-  font-size:.92rem;outline:none;transition:border-color .25s,box-shadow .25s;
-}
-.wall-form input:focus{border-color:var(--accent);box-shadow:0 0 14px rgba(255,34,16,.25)}
-.wall-form button{
-  background:var(--accent);color:var(--ink);border:none;
-  font-family:var(--font-display);text-transform:uppercase;letter-spacing:.1em;
-  font-size:.9rem;padding:13px 30px;transition:transform .15s,box-shadow .2s;
-}
-.wall-form button:hover{transform:translateY(-2px);box-shadow:0 0 20px rgba(255,34,16,.55)}
-.wall-form button:active{transform:translateY(0) scale(.97)}
-#wall{display:flex;flex-wrap:wrap;gap:14px 26px;min-height:42px;position:relative;z-index:1}
-#wall .name{
-  font-family:var(--font-marker);font-size:1.2rem;color:var(--chrome-hi);
-  animation:stamp .45s cubic-bezier(.2,1.6,.4,1) both;
-}
-@keyframes stamp{from{opacity:0;transform:scale(2.2) rotate(8deg)}to{opacity:1;transform:scale(1) rotate(var(--r,-2deg))}}
 
 /* ---- instagram ---- */
 #instagram{text-align:center}
@@ -431,8 +386,7 @@ h2.glitch::after{opacity:.85;color:#3ad7ff;transform:translate(3px,2px);clip-pat
 .shot img{width:100%;height:100%;object-fit:cover;display:block}
 .shot .ph{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  background:repeating-linear-gradient(45deg,#101014 0 8px,#0b0b0d 8px 16px),url("halftone.png");
-  background-size:auto,220px;background-blend-mode:overlay;
+  background:repeating-linear-gradient(45deg,#101014 0 8px,#0b0b0d 8px 16px);
 }
 .shot .ph-label{
   font-family:var(--font-mono);font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;
@@ -480,8 +434,7 @@ body.lb-open{overflow:hidden}
 #lbPh{
   width:min(620px,80vw);aspect-ratio:4/3;display:none;align-items:center;justify-content:center;
   border:1px solid var(--steel);
-  background:repeating-linear-gradient(45deg,#101014 0 10px,#0b0b0d 10px 20px),url("halftone.png");
-  background-size:auto,240px;background-blend-mode:overlay;
+  background:repeating-linear-gradient(45deg,#101014 0 10px,#0b0b0d 10px 20px);
 }
 #lbPh span{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:var(--chrome-lo);border:1px dashed var(--steel);padding:10px 16px}
 #lbCap{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:var(--chrome-hi);margin-top:16px;text-align:center}
@@ -515,51 +468,21 @@ body.lb-open{overflow:hidden}
   .lb-strip button{width:60px;height:45px}
 }
 
-/* ---- tweaks panel ---- */
-#tweakToggle{
-  position:fixed;right:18px;bottom:18px;z-index:9997;cursor:none;
-  background:rgba(6,6,7,.85);border:1px solid var(--steel);color:var(--chrome-lo);
-  font-family:var(--font-mono);font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;
-  padding:10px 14px;display:flex;align-items:center;gap:9px;backdrop-filter:blur(4px);
-  transition:border-color .2s,color .2s;
+/* ---- sound toggle (nav) ---- */
+.sound-btn{
+  display:flex;align-items:center;gap:8px;background:none;border:1px solid var(--steel);
+  color:var(--chrome-lo);font-family:var(--font-mono);font-size:.62rem;letter-spacing:.24em;
+  text-transform:uppercase;padding:7px 11px;transition:border-color .2s,color .2s;
 }
-#tweakToggle:hover{border-color:var(--accent);color:var(--chrome-hi)}
-#tweakToggle i{width:7px;height:7px;background:var(--accent);transform:rotate(45deg);box-shadow:0 0 8px var(--accent)}
-#tweakPanel{
-  position:fixed;right:18px;bottom:60px;z-index:9997;width:262px;display:none;
-  background:rgba(10,10,12,.96);border:1px solid var(--steel);
-  box-shadow:0 18px 50px rgba(0,0,0,.7), 6px 6px 0 rgba(0,0,0,.45);
-  backdrop-filter:blur(8px);padding:18px;
-}
-#tweakPanel.open{display:block}
-.tw-head{
-  font-family:var(--font-display);text-transform:uppercase;letter-spacing:.06em;
-  font-size:1rem;color:var(--chrome-hi);margin-bottom:18px;
-  display:flex;justify-content:space-between;align-items:baseline;
-}
-.tw-head span{font-family:var(--font-mono);font-size:.52rem;color:var(--accent);letter-spacing:.24em}
-.tw-row{margin-bottom:17px}
-.tw-row:last-child{margin-bottom:0}
-.tw-row > label{
-  font-family:var(--font-mono);font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;
-  color:var(--chrome-lo);display:block;margin-bottom:9px;
-}
-.tw-swatches{display:flex;gap:9px}
-.tw-sw{width:28px;height:28px;border:1px solid var(--steel);cursor:none;padding:0;transition:transform .15s}
-.tw-sw:hover{transform:scale(1.12)}
-.tw-sw.active{box-shadow:0 0 0 2px var(--chrome-hi)}
-.tw-row input[type=range]{width:100%;accent-color:var(--accent);cursor:none}
-.tw-toggle{display:flex;align-items:center;justify-content:space-between;cursor:none;margin-bottom:0!important}
-.tw-switch{width:40px;height:20px;border:1px solid var(--steel);background:var(--ink);position:relative;transition:border-color .2s;flex:none}
-.tw-switch::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;background:var(--chrome-lo);transition:left .18s,background .2s}
-.tw-switch.on{border-color:var(--accent)}
-.tw-switch.on::after{left:23px;background:var(--accent)}
-.tw-num{display:flex;align-items:center;gap:10px}
-.tw-num input{
-  width:74px;background:var(--ink);border:1px solid var(--steel);color:var(--chrome-hi);
-  font-family:var(--font-mono);font-size:.92rem;padding:7px 10px;outline:none;cursor:none;
-}
-.tw-num input:focus{border-color:var(--accent)}
+.sound-btn:hover{border-color:var(--accent);color:var(--chrome-hi)}
+.sound-btn .bars{display:flex;align-items:flex-end;gap:2px;height:10px}
+.sound-btn .bars i{width:2px;height:3px;background:currentColor;transition:height .3s}
+.sound-btn.on{color:var(--chrome-hi);border-color:var(--accent)}
+.sound-btn.on .bars i{background:var(--accent);animation:sbar .9s ease-in-out infinite alternate}
+.sound-btn.on .bars i:nth-child(2){animation-delay:-.3s}
+.sound-btn.on .bars i:nth-child(3){animation-delay:-.6s}
+@keyframes sbar{from{height:2px}to{height:10px}}
+@media(max-width:520px){ .bpm{display:none} nav .right{gap:10px} .sound-btn .lbl{display:none} }
 
 /* ---- footer ---- */
 footer{
@@ -585,8 +508,6 @@ footer .coords{color:var(--chrome-lo)}
 <body>
 
 <div id="cursor"></div>
-<div id="flicker"></div>
-<div id="halftone"></div>
 <div id="midline"></div>
 <div id="midline-progress"></div>
 <div id="lineDot"></div>
@@ -598,10 +519,10 @@ footer .coords{color:var(--chrome-lo)}
       <a href="#about">About</a>
       <a href="#events">Events</a>
       <a href="#archive">Archive</a>
-      <a href="#community">Community</a>
       <a href="#instagram">Instagram</a>
     </div>
     <div class="bpm"><i id="bpmDot"></i><span id="bpmText"></span></div>
+    <button class="sound-btn" id="soundBtn" aria-pressed="false" aria-label="Background sound"><span class="bars"><i></i><i></i><i></i></span><span class="lbl">Sound</span></button>
     <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="navLinks">Menu</button>
   </div>
 </nav>
@@ -625,7 +546,6 @@ footer .coords{color:var(--chrome-lo)}
 </header>
 
 <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker"></div></div>
-<div class="ticker rev" aria-hidden="true"><div class="ticker-track" id="ticker2"></div></div>
 
 <div id="about-wrap">
   <section id="about">
@@ -659,22 +579,6 @@ footer .coords{color:var(--chrome-lo)}
   </div>
 </section>
 
-<section id="community">
-  <div class="reveal">
-    <div class="kicker">If you were there, you know</div>
-    <h2 data-text="Community">Community</h2>
-    <div class="wall-box">
-      <h3 id="wallTitle"></h3>
-      <div class="hint" id="wallHint"></div>
-      <div class="wall-form">
-        <input id="wallInput" maxlength="24" placeholder="your name / tag" aria-label="Your name">
-        <button id="wallBtn">Tag the wall</button>
-      </div>
-      <div id="wall" aria-live="polite"></div>
-    </div>
-  </div>
-</section>
-
 <section id="instagram">
   <div class="reveal">
     <div class="kicker">Flyers, recaps, announcements</div>
@@ -704,35 +608,6 @@ footer .coords{color:var(--chrome-lo)}
   <div class="coords" id="footCoords"></div>
 </footer>
 
-<button id="tweakToggle" aria-label="Open tweaks"><i></i>Tweaks</button>
-<div id="tweakPanel" role="dialog" aria-label="Tweaks">
-  <div class="tw-head">Tweaks <span>live</span></div>
-  <div class="tw-row">
-    <label>Accent</label>
-    <div class="tw-swatches" id="twAccent">
-      <button class="tw-sw" data-c="#c4271a" style="background:#c4271a" aria-label="Oxide red"></button>
-      <button class="tw-sw" data-c="#c8ff1e" style="background:#c8ff1e" aria-label="Acid green"></button>
-      <button class="tw-sw" data-c="#2e7bff" style="background:#2e7bff" aria-label="Electric blue"></button>
-      <button class="tw-sw" data-c="#ededf2" style="background:#ededf2" aria-label="Bone white"></button>
-    </div>
-  </div>
-  <div class="tw-row">
-    <label>Film grain</label>
-    <input id="twGrain" type="range" min="0" max="0.4" step="0.01" value="0.12">
-  </div>
-  <div class="tw-row">
-    <label>Halftone grime</label>
-    <input id="twGrime" type="range" min="0" max="0.25" step="0.01" value="0.06">
-  </div>
-  <div class="tw-row">
-    <label class="tw-toggle" id="twScanRow">Scanlines <span class="tw-switch on" id="twScan"></span></label>
-  </div>
-  <div class="tw-row">
-    <label>Tempo</label>
-    <div class="tw-num"><input id="twBpm" type="number" min="60" max="200" value="140"><span style="font-family:var(--font-mono);font-size:.6rem;letter-spacing:.2em;color:var(--chrome-lo)">BPM</span></div>
-  </div>
-</div>
-
 <script>
 /* ================================================================
    ★★★ CONFIG — EDIT EVERYTHING HERE ★★★
@@ -744,8 +619,19 @@ const CONFIG = {
     sub:   "DJ collective — Rotterdam — tech house / techno / UKG",
   },
 
-  /* the pulsing counter in the nav */
+  /* the pulsing counter in the nav (also the tempo of the background kick) */
   bpm: 140,
+
+  /* background sound — made live in the browser, no audio file: slow soft
+     chords plus a muffled kick at "bpm", like hearing the club through a wall.
+     Browsers only allow sound after a click, so it fades in on the visitor's
+     first click; the "Sound" button in the menu bar turns it off/on. */
+  music: {
+    enabled:  true,
+    autoplay: true,   /* false = only plays after someone presses "Sound" */
+    volume:   0.5,    /* 0 – 1 */
+    pulse:    true,   /* false = chords only, no kick */
+  },
 
   /* next event countdown.
      Put a real date like "2026-07-04T22:00:00" to get a live
@@ -753,7 +639,6 @@ const CONFIG = {
   nextEventDate: null,
 
   ticker:  ["next event → soon", "Rotterdam", "tech house", "UKG", "techno", "secret locations", "no phones on the floor"],
-  ticker2: ["moonlight", "after hours", "lineup = the crew", "till the lights come on"],
 
   about: {
     kicker: "Who we are",
@@ -786,17 +671,12 @@ const CONFIG = {
   ],
 
   /* previous parties. photos:N shows folder/<prefix>001.jpg … up to N
-     (small versions come from folder/thumbs/). cover = photo number on the card. */
+     (small versions come from folder/thumbs/). cover = photo number on the card.
+     credit = optional "photos by" line shown in the viewer. */
   gallery: [
-    { caption: "Lake Party — sundown set", cover: 1, folder: "lake", prefix: "l", pad: 3, photos: 62 },
+    { caption: "Lake Party — sundown set", cover: 1, folder: "lake", prefix: "l", pad: 3, photos: 62, credit: "Photos by @sofia_bocchio" },
     { caption: "Duke of Tokyo — €5 night", cover: 3, folder: "duke", prefix: "d", pad: 2, photos: 32 },
   ],
-
-  wall: {
-    title: "Tag the wall",
-    hint:  "leave your name like a sticker on the booth — resets on reload, it's your local wall",
-    starters: [],   /* add names here to pre-fill the wall, e.g. ["yusa","taki"] */
-  },
 
   instagram: {
     handle: "@moonlight_rotterdam",
@@ -821,7 +701,6 @@ $('bpmDot').style.animation = `blink ${60/CONFIG.bpm}s steps(2) infinite`;
 /* repeated 4× so the strip is always wider than the screen; the animation moves it by half */
 const mk = a => a.map(t=>`<span>${t} <b>✦</b></span>`).join('').repeat(4);
 $('ticker').innerHTML  = mk(CONFIG.ticker);
-$('ticker2').innerHTML = mk(CONFIG.ticker2);
 
 /* ---- mobile menu ---- */
 const navLinks=$('navLinks'), menuBtn=$('menuBtn');
@@ -875,7 +754,7 @@ function renderLb(){
     lb.classList.add('loading');
     lbImg.src=fullOf(g,k); lbImg.alt=`${g.caption} — photo ${k} of ${g.photos}`;
     lbImg.style.display='block'; lbPh.style.display='none';
-    lbCap.textContent=`${g.caption}  ·  ${k} / ${g.photos}`;
+    lbCap.textContent=`${g.caption}  ·  ${k} / ${g.photos}${g.credit ? '  ·  '+g.credit : ''}`;
     /* load the neighbours in the background so next/prev feel instant */
     [k+1,k-1].forEach(j=>{ if(j>=1 && j<=g.photos) new Image().src=fullOf(g,j); });
     [...lbStrip.children].forEach((t,j)=>t.classList.toggle('on',j===lbIndex));
@@ -925,8 +804,6 @@ lb.addEventListener('touchend',e=>{
   if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.3) step(dx<0?1:-1);
 },{passive:true});
 
-$('wallTitle').textContent = CONFIG.wall.title;
-$('wallHint').textContent  = CONFIG.wall.hint;
 $('igLink').href           = CONFIG.instagram.url;
 $('igHandle').textContent  = CONFIG.instagram.handle;
 $('footLeft').innerHTML    = CONFIG.footer.left;
@@ -954,41 +831,16 @@ renderCountdown(); setInterval(renderCountdown, 1000);
   $('eq').innerHTML=h;
 })();
 
-/* ---- guest wall (in-memory) ---- */
-function addName(n){
-  if(!n.trim()) return;
-  const s=document.createElement('span');
-  s.className='name'; s.textContent=n.trim();
-  const r=(Math.random()*8-4).toFixed(1)+'deg';
-  s.style.setProperty('--r',r); s.style.transform=`rotate(${r})`;
-  if(Math.random()<.25) s.style.color='var(--accent)';
-  $('wall').appendChild(s);
-}
-CONFIG.wall.starters.forEach(addName);
-$('wallBtn').addEventListener('click',()=>{addName($('wallInput').value);$('wallInput').value='';$('wallInput').focus();});
-$('wallInput').addEventListener('keydown',e=>{if(e.key==='Enter'){addName($('wallInput').value);$('wallInput').value='';}});
-
 /* ---- reveal on scroll ---- */
 const io=new IntersectionObserver(es=>es.forEach(e=>{
   if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}
 }),{threshold:.12});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
-/* ---- heading glitch: on hover + random bursts ---- */
+/* ---- heading glitch on hover ---- */
 const heads=[...document.querySelectorAll('h2[data-text]')];
 function glitch(el){ if(reduced)return; el.classList.remove('glitch'); void el.offsetWidth; el.classList.add('glitch'); }
 heads.forEach(h=>h.addEventListener('mouseenter',()=>glitch(h)));
-if(!reduced) setInterval(()=>{ const h=heads[Math.floor(Math.random()*heads.length)]; if(h) glitch(h); }, 4200);
-
-/* ---- CRT flicker bursts ---- */
-if(!reduced)(function flick(){
-  setTimeout(()=>{
-    const f=$('flicker');
-    f.style.opacity=.05+Math.random()*.06;
-    setTimeout(()=>{f.style.opacity=0;}, 40+Math.random()*70);
-    flick();
-  }, 2600+Math.random()*6500);
-})();
 
 /* ---- custom cursor ---- */
 const cur=$('cursor');
@@ -1031,23 +883,97 @@ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(buildLine);
 setTimeout(buildLine,1500);
 buildLine();
 
-/* ---- tweaks panel (live) ---- */
+/* ---- background sound ----
+   Everything is synthesised with the Web Audio API: a slow 4-chord pad
+   (Am9 → Fmaj9 → Cmaj7 → G6) through a dark filter and a big reverb, plus a
+   kick drum filtered so it sounds like it's coming through the wall. */
+function ambientEngine(ctx, pulse){
+  const hz=m=>440*Math.pow(2,(m-69)/12);
+  const out=ctx.createGain(); out.gain.value=0;
+  const comp=ctx.createDynamicsCompressor(); comp.threshold.value=-24; comp.ratio.value=3;
+  out.connect(comp); comp.connect(ctx.destination);
+  /* reverb: a 4.5s burst of fading noise used as the room's echo */
+  const verb=ctx.createConvolver(), len=Math.floor(ctx.sampleRate*4.5), ir=ctx.createBuffer(2,len,ctx.sampleRate);
+  for(let c=0;c<2;c++){ const d=ir.getChannelData(c); for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.2); }
+  verb.buffer=ir;
+  const wet=ctx.createGain(); wet.gain.value=.6; verb.connect(wet); wet.connect(out);
+  /* pad: low-pass filter that slowly breathes open and closed */
+  const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=650; lp.Q.value=.5;
+  const lfo=ctx.createOscillator(), lfoAmt=ctx.createGain(); lfo.frequency.value=.04; lfoAmt.gain.value=300;
+  lfo.connect(lfoAmt); lfoAmt.connect(lp.frequency); lfo.start();
+  lp.connect(out); lp.connect(verb);
+  /* kick: everything above 200Hz cut off = "through the wall" */
+  const klp=ctx.createBiquadFilter(); klp.type='lowpass'; klp.frequency.value=200;
+  const kg=ctx.createGain(); kg.gain.value=pulse?.45:0; klp.connect(kg); kg.connect(out);
+  const kroom=ctx.createGain(); kroom.gain.value=.25; kg.connect(kroom); kroom.connect(verb);
+
+  const CHORDS=[[45,57,60,64,67,71],[41,57,60,64,65,69],[48,55,59,64,67,71],[43,55,59,62,64,69]]; /* first note = bass */
+  let n=0;
+  return {
+    out, chordSec:9.6,
+    chord(t){
+      const notes=CHORDS[n++%CHORDS.length], dur=this.chordSec*1.5;
+      notes.forEach((m,i)=>{
+        const g=ctx.createGain(), peak=i===0?.12:.065;
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(peak,t+dur*.4); g.gain.linearRampToValueAtTime(0,t+dur);
+        g.connect(lp);
+        (i===0?[0]:[-7,7]).forEach(det=>{
+          const o=ctx.createOscillator(); o.type=i===0?'sine':'sawtooth';
+          o.frequency.value=hz(m); o.detune.value=det; o.connect(g); o.start(t); o.stop(t+dur+.05);
+        });
+      });
+    },
+    kick(t){
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(48,t+.11);
+      g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.9,t+.004); g.gain.exponentialRampToValueAtTime(.0001,t+.32);
+      o.connect(g); g.connect(klp); o.start(t); o.stop(t+.35);
+    },
+  };
+}
 (()=>{
-  const root=document.documentElement.style;
-  const toggle=$('tweakToggle'), panel=$('tweakPanel');
-  toggle.addEventListener('click',()=>panel.classList.toggle('open'));
-  const sw=[...document.querySelectorAll('#twAccent .tw-sw')];
-  function setAccent(c,btn){ root.setProperty('--accent',c); sw.forEach(s=>s.classList.toggle('active',s===btn)); }
-  sw.forEach(s=>s.addEventListener('click',()=>setAccent(s.dataset.c,s)));
-  sw[0].classList.add('active');
-  $('twGrain').addEventListener('input',e=>root.setProperty('--grain',e.target.value));
-  $('twGrime').addEventListener('input',e=>root.setProperty('--grime',e.target.value));
-  const scan=$('twScan');
-  $('twScanRow').addEventListener('click',()=>{ const on=scan.classList.toggle('on'); root.setProperty('--scan',on?'0.5':'0'); });
-  $('twBpm').addEventListener('input',e=>{
-    const v=Math.max(60,Math.min(200, +e.target.value||132));
-    $('bpmText').textContent=v+' BPM';
-    $('bpmDot').style.animation=`blink ${60/v}s steps(2) infinite`;
+  const M=CONFIG.music, btn=$('soundBtn'), AC=window.AudioContext||window.webkitAudioContext;
+  if(!M || !M.enabled || !AC){ btn.remove(); return; }
+  const LEVEL=.42*Math.max(0,Math.min(1,M.volume));
+  const pref=(()=>{ try{ return localStorage.getItem('moonlight-sound'); }catch(e){ return null; } })();
+  let ctx=null, eng=null, on=false, timer=null, nextChord=0, nextBeat=0;
+  function schedule(){
+    const ahead=ctx.currentTime+.3, beat=60/CONFIG.bpm;
+    while(nextChord<ahead){ eng.chord(nextChord); nextChord+=eng.chordSec; }
+    while(nextBeat<ahead){ if(M.pulse) eng.kick(nextBeat); nextBeat+=beat; }
+  }
+  function fade(to,sec){ const g=eng.out.gain, t=ctx.currentTime; g.cancelScheduledValues(t); g.setValueAtTime(g.value,t); g.linearRampToValueAtTime(to,t+sec); }
+  function setOn(v){
+    on=v; btn.classList.toggle('on',on); btn.setAttribute('aria-pressed',on);
+    if(on){
+      if(!ctx){ ctx=new AC(); eng=ambientEngine(ctx,M.pulse); }
+      ctx.resume().then(()=>{
+        if(!on) return;
+        const t=ctx.currentTime;
+        if(nextChord<t) nextChord=t+.05;
+        if(nextBeat<t)  nextBeat=t+.05;
+        fade(LEVEL,4); schedule(); clearInterval(timer); timer=setInterval(schedule,100);
+      });
+    } else if(ctx){
+      fade(0,1.2); clearInterval(timer); timer=null;
+      setTimeout(()=>{ if(!on) ctx.suspend(); },1300);
+    }
+  }
+  btn.addEventListener('click',()=>{
+    setOn(!on);
+    try{ localStorage.setItem('moonlight-sound', on?'on':'off'); }catch(e){}
+  });
+  /* start on the visitor's first click or key press (browsers block sound before that) */
+  function first(e){
+    removeEventListener('click',first,true); removeEventListener('keydown',first,true);
+    if(e.target.closest && e.target.closest('#soundBtn')) return;
+    if(M.autoplay && pref!=='off') setOn(true);
+  }
+  addEventListener('click',first,true); addEventListener('keydown',first,true);
+  /* go quiet while the tab is in the background */
+  document.addEventListener('visibilitychange',()=>{
+    if(!ctx || !on) return;
+    if(document.hidden) ctx.suspend(); else ctx.resume();
   });
 })();
 </script>
