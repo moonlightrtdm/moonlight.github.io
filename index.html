@@ -343,6 +343,7 @@ h2.glitch::after{opacity:.85;color:#3ad7ff;transform:translate(3px,2px);clip-pat
 .event .date{font-family:var(--font-display);font-size:1.45rem;color:var(--accent);line-height:1.05}
 .event .name{font-family:var(--font-display);font-size:1.3rem;text-transform:uppercase;letter-spacing:.04em}
 .event .meta{color:var(--chrome-lo);font-size:.84rem;margin-top:4px;font-family:var(--font-mono)}
+.event .meta.lineup{font-size:.72rem;letter-spacing:.06em;color:#9a9aa6}
 .event .tag{
   font-family:var(--font-mono);font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;
   border:1px solid var(--chrome-lo);padding:7px 14px;color:var(--chrome-lo);white-space:nowrap;
@@ -769,9 +770,14 @@ const CONFIG = {
   },
 
   /* type:"next" = pulsing tag.  secret:true = redacted location bar
-     album:N = adds a "see photos" link that opens gallery entry N (0 = first) */
+     album:N = adds a "see photos" link that opens gallery entry N (0 = first)
+     lineup:"…" = optional extra line with the DJs */
   events: [
     { date: "SOON",     name: "Next Moonlight",      meta: "location", tag: "Announced soon", type: "next", secret: true },
+    { date: "26.09.26", name: "Moonlight Vol.5 — Duke of Tokyo", meta: "10PM–3AM · €5 ticket · house / tech house / techno", tag: "Club night",
+      lineup: "Drei · Quintexx · Emilio · Yusa · Velázquez · Artur · Lolli" },
+    { date: "12.09.26", name: "New Semester — Duke of Tokyo",    meta: "10PM–3AM · €5 ticket · open deck for new DJs",        tag: "Open deck",
+      lineup: "Yusa · Lolli · Artur · Cagan · Velázquez" },
     { date: "23.05.26", name: "Lake Party",           meta: "DJ set · free beer · 6PM–10PM",  tag: "Free event", album: 0 },
     { date: "14.05.26", name: "Duke of Tokyo",        meta: "10PM–2AM · €5 ticket",           tag: "Club night", album: 1 },
     { date: "19.03.26", name: "Duke of Tokyo",        meta: "10PM–2AM · €3 ticket",           tag: "Club night" },
@@ -839,6 +845,7 @@ $('eventList').innerHTML = CONFIG.events.map(e=>{
     <div>
       <div class="name">${e.name}</div>
       <div class="meta">${e.secret ? e.meta.replace(/location/i,'<span class="redact">location</span>') : e.meta}</div>
+      ${e.lineup ? `<div class="meta lineup">Lineup — ${e.lineup}</div>` : ``}
       ${g && g.photos ? `<button class="ev-photos" data-i="${e.album}">See ${g.photos} photos →</button>` : ``}
     </div>
     <div class="tag">${e.tag}</div>
