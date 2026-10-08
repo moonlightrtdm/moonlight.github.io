@@ -217,6 +217,7 @@ h2{font-size:clamp(2.4rem,6.6vw,4.9rem);color:var(--moon);margin-bottom:46px}
 .about-copy p+p{margin-top:18px}
 .facts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .facts div{background:var(--night-2);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+.facts div:last-child:nth-child(odd){grid-column:1/-1}
 .facts b{display:block;color:var(--dim);font-size:.68rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px}
 .facts span{display:block;color:var(--moon);font-stretch:125%;font-weight:800;font-size:1.02rem;line-height:1.2;text-transform:uppercase}
 .crew{margin-top:70px}
@@ -261,7 +262,7 @@ h2{font-size:clamp(2.4rem,6.6vw,4.9rem);color:var(--moon);margin-bottom:46px}
 }
 
 /* ---- archive ---- */
-/* newest album is the big one; the rest fill in beside it */
+/* first album is the big one; the rest fill in beside it */
 .gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
 .gallery .shot:first-child{grid-column:span 2;grid-row:span 2;aspect-ratio:auto}
 .gallery .shot:first-child .label span{font-size:clamp(1.2rem,2.4vw,1.8rem)}
@@ -516,9 +517,8 @@ const CONFIG = {
     p2: "Tech house, techno, house and hip-hop. Cheap tickets, good people and new faces every night. First-years and regulars, everyone's welcome.",
     facts: [
       { k: "Base",    v: "Rotterdam" },
-      { k: "Sound",   v: "Tech house · Techno · House · Hip-hop" },
       { k: "Tickets", v: "€3 – €5" },
-      { k: "Crew",    v: "{crew} DJs" },   /* {crew} = number of people in the crew list */
+      { k: "Sound",   v: "Tech house · Techno · House · Hip-hop" },
     ],
   },
 
@@ -527,13 +527,13 @@ const CONFIG = {
      lineup:"…" = the DJs, in timetable order.  color = one of the colours above */
   events: [
     { date: "SOON",     name: "Next Moonlight", meta: "location", type: "next", secret: true, color: "pink" },
-    { date: "26.09.26", name: "Moonlight Vol.5 — Duke of Tokyo", meta: "10PM–3AM · €5 ticket · house / tech house / techno", album: 0, color: "pink",
+    { date: "26.09.26", name: "Moonlight Vol.5 — Duke of Tokyo", meta: "10PM–3AM · €5 ticket · house / tech house / techno", album: 1, color: "pink",
       lineup: "Drei · Quintexx · Emilio · Yusa & Drei · Kike · Lolli & Artur" },
     { date: "12.09.26", name: "New Semester — Duke of Tokyo", meta: "10PM–3AM · €5 ticket · open deck for new DJs", color: "acid",
-      lineup: "Yusa · Lolli · Artur · Cagan · Velázquez" },
-    { date: "23.05.26", name: "Lake Party", meta: "6PM–10PM · free beer · house / hip-hop", album: 1, color: "green",
+      lineup: "Yusa · Lolli · Artur · Cagan · Kike" },
+    { date: "23.05.26", name: "Lake Party", meta: "6PM–10PM · free beer · house / hip-hop", album: 2, color: "green",
       lineup: "The Moonlight crew" },
-    { date: "14.05.26", name: "Duke of Tokyo", meta: "10PM–2AM · €5 ticket · tech house / techno / hip-hop", album: 2, color: "blue",
+    { date: "14.05.26", name: "Duke of Tokyo", meta: "10PM–2AM · €5 ticket · tech house / techno / hip-hop", album: 0, color: "blue",
       lineup: "Cagan · Skybrothers · Quintexx · Drei · Yusa & Amber Boo · Lolli & Artur · Adam Papanek" },
     { date: "19.03.26", name: "Duke of Tokyo", meta: "10PM–2AM · €3 ticket · tech house / techno", album: 3, color: "fire",
       lineup: "Amber Boo · Skybrothers · Drei · Yusa · Dr. Hide · Lolli & Artur · Adam Papanek" },
@@ -543,15 +543,15 @@ const CONFIG = {
       lineup: "Yusa · Taki · Lolli · Amber Boo" },
   ],
 
-  /* previous parties, newest first.
+  /* previous parties. The first one is the big card in the archive; the rest follow newest first.
      photos:N → folder/<prefix>001.jpg …  (pad = how many digits)
      clips:N  → folder/clips/<prefix>c01.mp4 …  (short videos)
      small versions of both live in folder/thumbs/ with the same names.
      cover = which item (1 = first) is on the card. credit = optional "photos by". */
   gallery: [
+    { date: "14.05.26", caption: "Duke of Tokyo — €5 night", folder: "duke",  prefix: "d", pad: 2, photos: 32, cover: 3, color: "blue" },
     { date: "26.09.26", caption: "Moonlight Vol.5",          folder: "sep26", prefix: "s", pad: 2, clips: 4,   cover: 1, color: "pink" },
     { date: "23.05.26", caption: "Lake Party — sundown set", folder: "lake",  prefix: "l", pad: 3, photos: 62, cover: 1, color: "green", credit: "Photos by @sofia_bocchio" },
-    { date: "14.05.26", caption: "Duke of Tokyo — €5 night", folder: "duke",  prefix: "d", pad: 2, photos: 32, cover: 3, color: "blue" },
     { date: "19.03.26", caption: "Duke of Tokyo — €3 night", folder: "mar19", prefix: "m", pad: 2, clips: 10,  cover: 2, color: "fire" },
     { date: "17.01.26", caption: "Super Disco Rotterdam",    folder: "jan17", prefix: "j", pad: 2, photos: 25, cover: 1, color: "cyan" },
   ],
@@ -569,8 +569,7 @@ const CONFIG = {
     { name: "Dr. Hide",     ig: "dr.hide_" },
     { name: "Cagan",        ig: "caganpoyraz_" },
     { name: "Emilio",       ig: "emilio.glr" },
-    { name: "Velázquez",    ig: "velazquez.wav" },
-    { name: "Kike",         ig: "" },
+    { name: "Kike",         ig: "velazquez.wav" },
     { name: "Taki",         ig: "" },
   ],
 
