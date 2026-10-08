@@ -192,6 +192,8 @@ body.sound-on .deck::before{animation:beat var(--beat,.43s) ease-out infinite}
 .hero-sub{font-size:clamp(1.15rem,3.4vw,2rem);color:var(--moon)}
 .hero-genres{margin-top:12px;color:var(--dim);font-size:.8rem;font-weight:600;letter-spacing:.26em;text-transform:uppercase}
 .hero-cta{margin-top:32px;display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center}
+/* hero text and buttons sit above the center line */
+.hero-sub,.hero-genres,.hero-cta{position:relative;z-index:2}
 .next-pill{
   display:inline-flex;align-items:center;gap:10px;padding:12px 20px;border-radius:999px;
   background:var(--night-3);border:1px solid var(--line);color:var(--moon);
@@ -240,12 +242,13 @@ h2{font-size:clamp(2.4rem,6.6vw,4.9rem);color:var(--moon);margin-bottom:46px}
 .facts div:last-child:nth-child(odd){grid-column:1/-1}
 .facts b{display:block;color:var(--dim);font-size:.68rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px}
 .facts span{display:block;color:var(--moon);font-stretch:125%;font-weight:800;font-size:1.02rem;line-height:1.2;text-transform:uppercase}
-.crew{margin-top:70px}
-.crew .kicker{color:var(--dim)}
-.crew-list{display:flex;flex-wrap:wrap;gap:10px}
+/* the crew: a small strip at the bottom of the page, just above the footer */
+.crew{position:relative;z-index:2;max-width:820px;margin:0 auto;padding:0 24px 56px;text-align:center}
+.crew .kicker{color:var(--dim);font-size:.64rem;margin-bottom:12px}
+.crew-list{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
 .crew-list a,.crew-list span{
-  border:1px solid var(--line);border-radius:999px;background:var(--night-2);padding:9px 17px;
-  color:var(--moon);text-decoration:none;font-weight:700;font-size:.88rem;
+  border:1px solid var(--line);border-radius:999px;background:var(--night-2);padding:5px 12px;
+  color:var(--moon);text-decoration:none;font-weight:700;font-size:.74rem;
   transition:background .2s,border-color .2s,color .2s,transform .2s;
 }
 .crew-list span{color:var(--dim)}
@@ -282,7 +285,7 @@ h2{font-size:clamp(2.4rem,6.6vw,4.9rem);color:var(--moon);margin-bottom:46px}
 }
 
 /* ---- archive ---- */
-/* first album is the big one; the rest fill in beside it */
+/* first album is the big one (it loads the full-size cover, not the thumbnail); the rest fill in beside it */
 .gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
 .gallery .shot:first-child{grid-column:span 2;grid-row:span 2;aspect-ratio:auto}
 .gallery .shot:first-child .label span{font-size:clamp(1.2rem,2.4vw,1.8rem)}
@@ -438,10 +441,6 @@ body.lb-open{overflow:hidden}
       <div class="about-copy"><p id="aboutP1"></p><p id="aboutP2"></p></div>
       <div class="facts" id="facts"></div>
     </div>
-    <div class="crew">
-      <div class="kicker">The crew — everyone who's played Moonlight</div>
-      <div class="crew-list" id="crewList"></div>
-    </div>
   </div>
 </section>
 
@@ -471,6 +470,11 @@ body.lb-open{overflow:hidden}
     </a>
   </div>
 </section>
+
+<div class="crew">
+  <div class="kicker">The crew — everyone who's played Moonlight</div>
+  <div class="crew-list" id="crewList"></div>
+</div>
 
 <footer>
   <a class="brand" href="#top" aria-label="Moonlight — back to top"><svg viewBox="0 0 1986 790"><use href="#logo"/></svg></a>
@@ -573,9 +577,9 @@ const CONFIG = {
      small versions of both live in folder/thumbs/ with the same names.
      cover = which item (1 = first) is on the card. credit = optional "photos by". */
   gallery: [
-    { date: "14.05.26", caption: "Duke of Tokyo — €5 night", folder: "duke",  prefix: "d", pad: 2, photos: 54, cover: 3, color: "blue", credit: "Photos by @sofia_bocchio" },
+    { date: "14.05.26", caption: "Duke of Tokyo — €5 night", folder: "duke",  prefix: "d", pad: 2, photos: 54, cover: 3, color: "blue" },
     { date: "26.09.26", caption: "Moonlight Vol.5",          folder: "sep26", prefix: "s", pad: 2, clips: 4,   cover: 1, color: "pink" },
-    { date: "23.05.26", caption: "Lake Party — sundown set", folder: "lake",  prefix: "l", pad: 3, photos: 108, cover: 1, color: "green", credit: "Photos by @sofia_bocchio" },
+    { date: "23.05.26", caption: "Lake Party — sundown set", folder: "lake",  prefix: "l", pad: 3, photos: 108, cover: 1, color: "green" },
     { date: "19.03.26", caption: "Duke of Tokyo — €3 night", folder: "mar19", prefix: "m", pad: 2, clips: 10,  cover: 2, color: "fire" },
     { date: "17.01.26", caption: "Super Disco Rotterdam",    folder: "jan17", prefix: "j", pad: 2, photos: 25, cover: 1, color: "cyan" },
   ],
@@ -680,7 +684,7 @@ $('gallery').innerHTML = CONFIG.gallery.map((g,i)=>{
   const items=itemsOf(g), cov=items[(g.cover||1)-1]||items[0];
   return `
   <button class="shot" data-i="${i}" style="--c:${colorOf(g.color)}" aria-label="Open: ${g.caption}, ${g.date||''}">
-    ${cov ? `<img src="${cov.thumb}" alt="" loading="lazy" decoding="async">` : ``}
+    ${cov ? `<img src="${i===0 ? cov.full : cov.thumb}" alt="" loading="lazy" decoding="async">` : ``}
     ${items.length ? `<span class="count">${countOf(g)}</span>` : ``}
     <span class="label">${g.date ? `<b>${g.date}</b>` : ``}<span>${g.caption}</span></span>
   </button>`;}).join('');
