@@ -285,11 +285,15 @@ h2{font-size:clamp(2.4rem,6.6vw,4.9rem);color:var(--moon);margin-bottom:46px}
 }
 
 /* ---- archive ---- */
-/* first album is the big one (it loads the full-size cover, not the thumbnail); the rest fill in beside it */
+/* first album is the big one; the rest fill in beside it */
 .gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
 .gallery .shot:first-child{grid-column:span 2;grid-row:span 2;aspect-ratio:auto}
 .gallery .shot:first-child .label span{font-size:clamp(1.2rem,2.4vw,1.8rem)}
-@media(max-width:900px){ .gallery{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:900px){
+  .gallery{grid-template-columns:repeat(2,1fr)}
+  /* nothing sits beside the big card here, so it needs its own height */
+  .gallery .shot:first-child{grid-row:auto;aspect-ratio:4/3}
+}
 @media(max-width:520px){
   .gallery{grid-template-columns:1fr}
   .gallery .shot:first-child{grid-column:auto;grid-row:auto;aspect-ratio:4/5}
@@ -573,13 +577,14 @@ const CONFIG = {
 
   /* previous parties. The first one is the big card in the archive; the rest follow newest first.
      photos:N → folder/<prefix>001.jpg …  (pad = how many digits)
-     clips:N  → folder/clips/<prefix>c01.mp4 …  (short videos)
+     clips:N  → folder/clips/<prefix>c01.mp4 …  (short videos) + a full-size frame of each as folder/clips/<prefix>c01.jpg
      small versions of both live in folder/thumbs/ with the same names.
-     cover = which item (1 = first) is on the card. credit = optional "photos by". */
+     cover = which item (1 = first) is on the card; cards show it full-size so it stays sharp.
+     credit = optional "photos by". */
   gallery: [
     { date: "14.05.26", caption: "Duke of Tokyo — €5 night", folder: "duke",  prefix: "d", pad: 2, photos: 54, cover: 3, color: "blue" },
     { date: "26.09.26", caption: "Moonlight Vol.5",          folder: "sep26", prefix: "s", pad: 2, clips: 4,   cover: 1, color: "pink" },
-    { date: "23.05.26", caption: "Lake Party — sundown set", folder: "lake",  prefix: "l", pad: 3, photos: 108, cover: 1, color: "green" },
+    { date: "23.05.26", caption: "Lake Party — sundown set", folder: "lake",  prefix: "l", pad: 3, photos: 108, cover: 107, color: "green" },
     { date: "19.03.26", caption: "Duke of Tokyo — €3 night", folder: "mar19", prefix: "m", pad: 2, clips: 10,  cover: 2, color: "fire" },
     { date: "17.01.26", caption: "Super Disco Rotterdam",    folder: "jan17", prefix: "j", pad: 2, photos: 25, cover: 1, color: "cyan" },
   ],
@@ -660,7 +665,7 @@ const itemsOf = g => [
   ...Array.from({length:g.photos||0},(_,i)=>{ const n=g.prefix+String(i+1).padStart(g.pad,'0');
     return {clip:false, full:`${g.folder}/${n}.jpg`, thumb:`${g.folder}/thumbs/${n}.jpg`}; }),
   ...Array.from({length:g.clips||0},(_,i)=>{ const n=g.prefix+'c'+String(i+1).padStart(2,'0');
-    return {clip:true, full:`${g.folder}/clips/${n}.mp4`, thumb:`${g.folder}/thumbs/${n}.jpg`}; }),
+    return {clip:true, full:`${g.folder}/clips/${n}.mp4`, poster:`${g.folder}/clips/${n}.jpg`, thumb:`${g.folder}/thumbs/${n}.jpg`}; }),
 ];
 const countOf = g => [g.photos ? `${g.photos} photos` : '', g.clips ? `${g.clips} clips` : ''].filter(Boolean).join(' · ');
 
@@ -684,7 +689,7 @@ $('gallery').innerHTML = CONFIG.gallery.map((g,i)=>{
   const items=itemsOf(g), cov=items[(g.cover||1)-1]||items[0];
   return `
   <button class="shot" data-i="${i}" style="--c:${colorOf(g.color)}" aria-label="Open: ${g.caption}, ${g.date||''}">
-    ${cov ? `<img src="${i===0 ? cov.full : cov.thumb}" alt="" loading="lazy" decoding="async">` : ``}
+    ${cov ? `<img src="${cov.clip ? cov.poster : cov.full}" alt="" loading="lazy" decoding="async">` : ``}
     ${items.length ? `<span class="count">${countOf(g)}</span>` : ``}
     <span class="label">${g.date ? `<b>${g.date}</b>` : ``}<span>${g.caption}</span></span>
   </button>`;}).join('');
@@ -706,7 +711,7 @@ function renderLb(){
   lb.classList.add('loading'); lbPh.style.display='none';
   if(it.clip){
     lbImg.removeAttribute('src'); lbImg.style.display='none';
-    lbVid.muted=true; lbVid.poster=it.thumb; lbVid.src=it.full; lbVid.style.display='block';
+    lbVid.muted=true; lbVid.poster=it.poster; lbVid.src=it.full; lbVid.style.display='block';
     wantPlay=true; lbVid.play().then(()=>{ wantPlay=false; }).catch(()=>{});
   } else {
     stopClip();
