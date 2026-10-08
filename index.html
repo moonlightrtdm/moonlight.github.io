@@ -100,7 +100,7 @@ nav{
 nav.scrolled{background:rgba(8,8,12,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-color:var(--line)}
 .brand{display:block;width:112px;color:var(--moon)}
 .brand svg{display:block;width:100%;height:auto}
-nav .right{display:flex;align-items:center;gap:22px}
+nav .left,nav .right{display:flex;align-items:center;gap:22px}
 nav .links{display:flex;gap:26px}
 nav .links a{
   color:var(--dim);text-decoration:none;font-size:.76rem;font-weight:700;
@@ -111,16 +111,15 @@ nav .links a:hover{color:var(--moon)}
   display:flex;align-items:center;gap:8px;background:none;cursor:pointer;
   border:1px solid var(--line);border-radius:999px;color:var(--dim);
   font-family:inherit;font-weight:700;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
-  padding:8px 14px;transition:border-color .2s,color .2s;
+  padding:8px 14px;transition:border-color .2s,color .2s;white-space:nowrap;
 }
 .chip-btn:hover{border-color:var(--moon);color:var(--moon)}
-.sound-btn .bars{display:flex;align-items:flex-end;gap:2px;height:10px}
-.sound-btn .bars i{width:2px;height:3px;background:currentColor;border-radius:1px}
 .sound-btn.on{color:var(--moon);border-color:var(--accent)}
-.sound-btn.on .bars i{background:var(--accent);animation:sbar .9s ease-in-out infinite alternate}
-.sound-btn.on .bars i:nth-child(2){animation-delay:-.3s}
-.sound-btn.on .bars i:nth-child(3){animation-delay:-.6s}
-@keyframes sbar{from{height:2px}to{height:10px}}
+/* "Sound on" / "Sound off" share one spot, so the button keeps its width when it switches */
+.sound-btn .lbl{display:grid}
+.sound-btn .lbl span{grid-area:1/1}
+.sound-btn .l-on,.sound-btn.on .l-off{visibility:hidden}
+.sound-btn.on .l-on{visibility:visible}
 .menu-btn{display:none}
 @media(max-width:760px){
   nav{padding:12px 18px}
@@ -130,10 +129,10 @@ nav .links a:hover{color:var(--moon)}
   }
   nav .links.open{display:flex}
   nav .links a{padding:16px 22px;border-top:1px solid var(--line);font-size:.84rem}
-  nav .right{gap:10px}
+  nav .left,nav .right{gap:10px}
   .menu-btn{display:flex}
 }
-@media(max-width:420px){ .brand{width:94px} .sound-btn .lbl{display:none} }
+@media(max-width:420px){ .brand{width:84px} .chip-btn{padding:8px 11px;letter-spacing:.12em} }
 
 /* ===================== HERO: THE RECORD ===================== */
 header{
@@ -403,7 +402,10 @@ body.lb-open{overflow:hidden}
 </svg>
 
 <nav id="nav">
-  <a class="brand" href="#top" aria-label="Moonlight — back to top"><svg viewBox="0 0 1986 790"><use href="#logo"/></svg></a>
+  <div class="left">
+    <a class="brand" href="#top" aria-label="Moonlight — back to top"><svg viewBox="0 0 1986 790"><use href="#logo"/></svg></a>
+    <button class="chip-btn sound-btn" id="soundBtn" aria-pressed="false" aria-label="Background sound"><span class="lbl"><span class="l-on">Sound on</span><span class="l-off">Sound off</span></span></button>
+  </div>
   <div class="right">
     <div class="links" id="navLinks">
       <a href="#about">About</a>
@@ -411,7 +413,6 @@ body.lb-open{overflow:hidden}
       <a href="#archive">Archive</a>
       <a href="#instagram">Instagram</a>
     </div>
-    <button class="chip-btn sound-btn" id="soundBtn" aria-pressed="false" aria-label="Background sound"><span class="bars"><i></i><i></i><i></i></span><span class="lbl">Sound</span></button>
     <button class="chip-btn menu-btn" id="menuBtn" aria-expanded="false" aria-controls="navLinks">Menu</button>
   </div>
 </nav>
@@ -528,11 +529,12 @@ const CONFIG = {
 
   /* background sound — made live in the browser, no audio file: slow soft
      chords plus a muffled kick at "bpm", like hearing the club through a wall.
-     Browsers only allow sound after a click, so it fades in on the visitor's
-     first click; the "Sound" button in the menu bar turns it off/on. */
+     It's on by default and fades in as soon as the browser allows — usually the
+     visitor's first tap, click or key press. The "Sound on / Sound off" button
+     next to the logo switches it. */
   music: {
     enabled:  true,
-    autoplay: true,   /* false = only plays after someone presses "Sound" */
+    autoplay: true,   /* false = only plays after someone presses the sound button */
     volume:   0.5,    /* 0 – 1 */
     pulse:    true,   /* false = chords only, no kick */
   },
@@ -882,11 +884,16 @@ function ambientEngine(ctx, pulse){
     while(nextBeat<ahead){ if(M.pulse) eng.kick(nextBeat); nextBeat+=beat; }
   }
   function fade(to,sec){ const g=eng.out.gain, t=ctx.currentTime; g.cancelScheduledValues(t); g.setValueAtTime(g.value,t); g.linearRampToValueAtTime(to,t+sec); }
+  /* the button says "Sound on" only while sound is actually playing */
+  function showState(){
+    const playing = on && !!ctx && ctx.state==='running';
+    btn.classList.toggle('on',playing); btn.setAttribute('aria-pressed',playing);
+    document.body.classList.toggle('sound-on',playing);
+  }
   function setOn(v){
-    on=v; btn.classList.toggle('on',on); btn.setAttribute('aria-pressed',on);
-    document.body.classList.toggle('sound-on',on);
+    on=v;
     if(on){
-      if(!ctx){ ctx=new AC(); eng=ambientEngine(ctx,M.pulse); }
+      if(!ctx){ ctx=new AC(); eng=ambientEngine(ctx,M.pulse); ctx.addEventListener('statechange',showState); }
       ctx.resume().then(()=>{
         if(!on) return;
         const t=ctx.currentTime;
@@ -898,18 +905,21 @@ function ambientEngine(ctx, pulse){
       fade(0,1.2); clearInterval(timer); timer=null;
       setTimeout(()=>{ if(!on) ctx.suspend(); },1300);
     }
+    showState();
   }
   btn.addEventListener('click',()=>{
-    setOn(!on);
+    setOn(!btn.classList.contains('on'));
     try{ localStorage.setItem('moonlight-sound', on?'on':'off'); }catch(e){}
   });
-  /* start on the visitor's first click or key press (browsers block sound before that) */
-  function first(e){
-    removeEventListener('click',first,true); removeEventListener('keydown',first,true);
+  /* sound is on by default: try to start right away. Most browsers hold it back until the
+     visitor first taps, clicks or presses a key, so it starts on that first touch instead.
+     Anyone who switched it off keeps it off. */
+  if(M.autoplay && pref!=='off') setOn(true);
+  function wake(e){
     if(e.target.closest && e.target.closest('#soundBtn')) return;
-    if(M.autoplay && pref!=='off') setOn(true);
+    if(on && ctx && ctx.state!=='running' && !document.hidden) setOn(true);
   }
-  addEventListener('click',first,true); addEventListener('keydown',first,true);
+  ['pointerdown','touchend','keydown'].forEach(t=>addEventListener(t,wake,true));
   /* step aside while a party clip plays with its own sound */
   addEventListener('moonlight-duck',e=>{ if(ctx && on) fade(e.detail ? 0 : LEVEL, e.detail ? .5 : 2.5); });
   /* go quiet while the tab is in the background */
